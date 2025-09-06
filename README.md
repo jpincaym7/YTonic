@@ -1,167 +1,109 @@
-# YouTube to MP3/MP4 Downloader
+# 🎵 YTonic
 
-Una aplicación web moderna construida con Next.js 15 y TypeScript que permite descargar videos de YouTube en formato MP3 (solo audio) o MP4 (video completo).
+**Convertidor moderno de YouTube a MP3/MP4**
 
-## Características
+![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=flat-square&logo=tailwindcss)
 
-### 🎵 Descarga de Audio (MP3)
-- Extrae solo el audio del video
-- Calidad de audio optimizada (highestaudio)
-- Formato MP3 compatible con todos los reproductores
+---
 
-### 🎬 Descarga de Video (MP4)
-- Video completo con audio
-- Calidad automática optimizada
-- Formato MP4 estándar
+## ✨ Características
 
-### 📱 Interfaz Moderna
-- Diseño responsivo con Tailwind CSS
-- Vista previa del video con thumbnail
-- Información detallada (título, autor, duración, vistas)
-- Indicador de progreso de descarga
+- 🎵 **Conversión MP3/MP4** - Audio y video de alta calidad
+- ⚡ **Descarga rápida** - Procesamiento optimizado
+- 📱 **Diseño responsivo** - Compatible con todos los dispositivos  
+- 🔒 **Privacidad total** - Sin registro ni almacenamiento de datos
+- 🎨 **Interfaz moderna** - Animaciones fluidas con GSAP y Framer Motion
+- 🛡️ **Validación CAPTCHA** - Protección contra bots
 
-### ⚡ Tecnologías Utilizadas
-- **Next.js 15** - Framework React con App Router
-- **TypeScript** - Tipado estático
-- **Tailwind CSS** - Estilos modernos
-- **ytdl-core** - Biblioteca para descargar videos de YouTube
-- **Streaming API** - Descarga eficiente sin bloqueos
+## 🚀 Inicio rápido
 
-## Instalación
-
-1. Clona el repositorio:
 ```bash
-git clone <url-del-repositorio>
+# Clonar repositorio
+git clone <repo-url>
 cd api-youtube-mp3
-```
 
-2. Instala las dependencias:
-```bash
+# Instalar dependencias
 npm install
-```
 
-3. Ejecuta el servidor de desarrollo:
-```bash
+# Ejecutar en desarrollo
 npm run dev
+
+# Construir para producción
+npm run build
 ```
 
-4. Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+## 🛠️ Stack tecnológico
 
-## Uso
+- **Framework**: Next.js 15 con App Router
+- **Lenguaje**: TypeScript
+- **Estilos**: TailwindCSS 4
+- **Animaciones**: GSAP + Framer Motion
+- **Backend**: ytdl-core para procesamiento de videos
+- **UI**: Componentes personalizados minimalistas
 
-1. **Ingresa la URL**: Pega la URL de un video de YouTube en el campo de entrada
-2. **Obtén información**: Haz clic en "Obtener Info" para ver los detalles del video
-3. **Elige formato**: Selecciona MP3 (audio) o MP4 (video)
-4. **Descarga**: Haz clic en el botón correspondiente para iniciar la descarga
+## 📋 Funcionalidades
 
-## API Endpoints
+### URLs soportadas
+- `youtube.com/watch?v=videoId`
+- `youtube.com/shorts/videoId`  
+- `youtu.be/videoId`
 
-### GET /api/youtube/info
-Obtiene información detallada de un video de YouTube.
+### Formatos de descarga
+- **MP3**: Audio de alta calidad (hasta 320 kbps)
+- **MP4**: Video completo con audio incluido
 
-**Request:**
-```json
-{
-  "url": "https://www.youtube.com/watch?v=VIDEO_ID"
-}
+### Opciones avanzadas
+- Configuración de calidad
+- Ajustes de buffer y chunk size
+- Filtros de descarga personalizados
+
+## 🎯 Uso
+
+1. **Pegar URL** - Ingresa el enlace del video de YouTube
+2. **Obtener información** - Visualiza metadatos del video
+3. **Seleccionar formato** - Elige entre MP3 o MP4
+4. **Descargar** - Completa el CAPTCHA y descarga
+
+## ⚠️ Limitaciones
+
+- Videos de máximo 90 minutos
+- No admite streams en vivo
+- No funciona con videos privados o restringidos por edad
+
+## 📄 Páginas
+
+- **Inicio** - Convertidor principal
+- **FAQ** - Preguntas frecuentes  
+- **Contacto** - Formulario de soporte
+- **Copyright** - Políticas y derechos de autor
+
+## 🔧 API Endpoints
+
+- `POST /api/youtube/info` - Obtener metadatos del video
+- `POST /api/youtube/download` - Descargar archivo convertido
+- `POST /api/contact` - Enviar mensaje de contacto
+
+## 👨‍💻 Desarrollo
+
+```bash
+# Modo desarrollo con Turbopack
+npm run dev
+
+# Linting
+npm run lint
+
+# Build optimizado
+npm run build
 ```
 
-**Response:**
-```json
-{
-  "title": "Título del video",
-  "author": "Nombre del canal",
-  "duration": "3:45",
-  "views": 1000000,
-  "thumbnail": "https://...",
-  "description": "Descripción del video"
-}
-```
+## 📝 Licencia
 
-### POST /api/youtube/download
-Descarga un video de YouTube en el formato especificado.
+© Todos los derechos reservados a: **Jordy David Pincay Murillo**
 
-**Request:**
-```json
-{
-  "url": "https://www.youtube.com/watch?v=VIDEO_ID",
-  "format": "mp3",
-  "options": {
-    "quality": "highestaudio",
-    "filter": "audioonly"
-  }
-}
-```
+---
 
-**Response:** Stream de archivo binario
-
-## Opciones Avanzadas de ytdl
-
-La aplicación soporta las siguientes opciones avanzadas de `ytdl-core`:
-
-### Opciones de Calidad
-- `quality`: 'highest', 'lowest', 'highestaudio', 'lowestaudio'
-- `filter`: 'audioonly', 'videoonly', 'audioandvideo'
-
-### Opciones de Rango
-```javascript
-{
-  range: { start: 10355705, end: 12452856 } // Descarga parcial
-}
-```
-
-### Opciones de Tiempo
-```javascript
-{
-  begin: '1:30', // Formato: mm:ss, hh:mm:ss, milisegundos
-  liveBuffer: 20000, // Buffer para videos en vivo (ms)
-}
-```
-
-### Opciones de Red
-```javascript
-{
-  highWaterMark: 512 * 1024, // Buffer de memoria (512 KB por defecto)
-  dlChunkSize: 10 * 1024 * 1024, // Tamaño de fragmentos (10 MB por defecto)
-  IPv6Block: undefined // Bloque IPv6 para rotación
-}
-```
-
-## Estructura del Proyecto
-
-```
-src/
-├── app/
-│   ├── api/
-│   │   └── youtube/
-│   │       ├── info/
-│   │       │   └── route.ts      # API para obtener info del video
-│   │       └── download/
-│   │           └── route.ts      # API para descargar videos
-│   ├── globals.css              # Estilos globales
-│   ├── layout.tsx               # Layout principal
-│   └── page.tsx                 # Página principal
-```
-
-## Limitaciones
-
-- Los videos muy largos pueden tomar tiempo considerable en descargarse
-- Algunos videos pueden tener restricciones de descarga por parte de YouTube
-- La calidad disponible depende de lo que YouTube proporcione
-- Los videos en vivo tienen limitaciones especiales
-
-## Contribución
-
-1. Fork el proyecto
-2. Crea tu rama de feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## Licencia
-
-Este proyecto está bajo la licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## Advertencia Legal
-
-Esta herramienta es solo para uso educativo y personal. Asegúrate de cumplir con los términos de servicio de YouTube y las leyes de derechos de autor de tu país antes de descargar contenido.
+<div align="center">
+  <strong>YTonic</strong> - Convierte videos de YouTube de forma rápida y segura
+</div>
