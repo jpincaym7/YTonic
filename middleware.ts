@@ -17,11 +17,23 @@ export function middleware(request: NextRequest) {
     "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self';"
   );
 
-  // Verificar rate limiting para rutas de API de contacto
+  // Headers específicos para APIs de YouTube
+  if (request.nextUrl.pathname.startsWith('/api/youtube')) {
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    response.headers.set('Access-Control-Max-Age', '86400');
+    
+    // Manejar preflight requests
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 200, headers: response.headers });
+    }
+  }
+
+  // Headers específicos para API de contacto
   if (request.nextUrl.pathname.startsWith('/api/contact')) {
-    // Headers específicos para API
-    response.headers.set('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? 'https://your-domain.com' : '*');
-    response.headers.set('Access-Control-Allow-Methods', 'POST');
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
   }
 

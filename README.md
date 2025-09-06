@@ -35,6 +35,20 @@ npm run dev
 npm run build
 ```
 
+## 🌐 Deployment
+
+### Vercel (Recomendado)
+```bash
+# Instalar Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+### Variables de entorno
+Copia `.env.example` a `.env.local` y configura las variables necesarias.
+
 ## 🛠️ Stack tecnológico
 
 - **Framework**: Next.js 15 con App Router
