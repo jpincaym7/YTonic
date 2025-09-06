@@ -24,14 +24,43 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    serverComponentsExternalPackages: ['@distube/ytdl-core'],
+    serverComponentsExternalPackages: ['@distube/ytdl-core', 'fluent-ffmpeg'],
   },
-  // Configuración para APIs
+  // Configuración para APIs en edge runtime
   api: {
     responseLimit: false,
     bodyParser: {
-      sizeLimit: '10mb',
+      sizeLimit: '50mb',
     },
+  },
+  // Optimizaciones para Vercel
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = [...(config.externals || []), 'fluent-ffmpeg'];
+    }
+    return config;
+  },
+  // Headers de seguridad
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+        ],
+      },
+    ];
   },
 };
 
