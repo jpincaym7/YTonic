@@ -28,8 +28,26 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ URL válida, obteniendo información...');
     
+    // Configurar opciones con headers mejorados para evitar detección de bot
+    const requestOptions = {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'DNT': '1',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Cache-Control': 'max-age=0',
+      }
+    };
+    
     // Obtener información del video para el nombre del archivo con timeout
-    const infoPromise = ytdl.getInfo(url);
+    const infoPromise = ytdl.getInfo(url, { requestOptions });
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('Timeout obteniendo información')), TIMEOUT_DURATION)
     );
@@ -52,11 +70,7 @@ export async function POST(request: NextRequest) {
     // Configurar opciones según el formato
     let downloadOptions: ytdl.downloadOptions = {
       quality: 'highest',
-      requestOptions: {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      },
+      requestOptions,
       ...options
     };
 
@@ -64,22 +78,14 @@ export async function POST(request: NextRequest) {
       downloadOptions = {
         quality: 'highestaudio',
         filter: 'audioonly',
-        requestOptions: {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
-        },
+        requestOptions,
         ...options
       };
     } else if (format === 'mp4') {
       downloadOptions = {
         quality: 'highest',
         filter: (fmt) => fmt.container === 'mp4' && fmt.hasVideo && fmt.hasAudio,
-        requestOptions: {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
-        },
+        requestOptions,
         ...options
       };
     }
