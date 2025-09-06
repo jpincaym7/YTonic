@@ -5,6 +5,7 @@
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=flat-square&logo=tailwindcss)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 ---
 
@@ -100,7 +101,9 @@ npm run build
 
 ## 📝 Licencia
 
-© Todos los derechos reservados a: **Jordy David Pincay Murillo**
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](./LICENSE) para más detalles.
+
+**Desarrollado por**: Jordy David Pincay Murillo
 
 ---
 
