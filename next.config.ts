@@ -23,16 +23,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@distube/ytdl-core', 'fluent-ffmpeg'],
-  },
-  // Configuración para APIs en edge runtime
-  api: {
-    responseLimit: false,
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
+  // Cambio: serverComponentsExternalPackages movido a serverExternalPackages
+  serverExternalPackages: ['@distube/ytdl-core', 'fluent-ffmpeg'],
   // Optimizaciones para Vercel
   webpack: (config, { isServer }) => {
     if (isServer) {
