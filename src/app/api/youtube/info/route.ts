@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 // Clave de YouTube Data API
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || 'AIzaSyBZuWVDrFAwil8Qyi8klpP3lNxsCqtgU5U';
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {

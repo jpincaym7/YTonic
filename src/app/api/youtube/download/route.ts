@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutos
 
 // Claves de RapidAPI
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || 'c26b1d1718msh5e69086ad261f42p1e6dcbjsn0f6b8e45530e';
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 
 export async function POST(request: NextRequest) {
   try {
