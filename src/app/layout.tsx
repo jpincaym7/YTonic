@@ -18,6 +18,13 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "YTonic",
   description: "Convierte y descarga videos de YouTube en baja/media/alta calidad MP3 o MP4",
+  icons: {
+    icon: [
+      { url: '/icon-yt.jpg', sizes: '32x32', type: 'image/jpeg' },
+      { url: '/icon-yt.jpg', sizes: '16x16', type: 'image/jpeg' },
+    ],
+    apple: '/icon-yt.jpg',
+  },
 };
 
 export default function RootLayout({
@@ -28,6 +35,8 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        <link rel="icon" href="/icon-yt.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/icon-yt.jpg" />
         <script 
           async 
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7692639932873351"
