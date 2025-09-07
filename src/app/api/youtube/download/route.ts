@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import ytdl from '@distube/ytdl-core';
+import axios from 'axios';
+import { extractVideoId, isValidYouTubeUrl } from '../../../../lib/youtube-utils';
 
 // Configurar runtime para Edge (mejor para Vercel)
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutos
+
+// Claves de RapidAPI
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || 'c26b1d1718msh5e69086ad261f42p1e6dcbjsn0f6b8e45530e';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,100 +20,128 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!ytdl.validateURL(url)) {
+    if (!isValidYouTubeUrl(url)) {
       return NextResponse.json(
         { error: 'URL de YouTube no válida' },
         { status: 400 }
       );
     }
 
-    // Obtener información del video para el nombre del archivo
-    const info = await ytdl.getInfo(url);
-    const title = info.videoDetails.title.replace(/[^\w\s-]/gi, '').trim().substring(0, 100);
+    // Extraer ID del video
+    const videoId = extractVideoId(url);
+    if (!videoId) {
+      return NextResponse.json(
+        { error: 'No se pudo extraer el ID del video de la URL' },
+        { status: 400 }
+      );
+    }
 
-    // Configurar opciones según el formato
-    let downloadOptions: ytdl.downloadOptions = {
-      quality: 'highest',
-      requestOptions: {
+    console.log(`Iniciando descarga ${format.toUpperCase()} para video ID: ${videoId}`);
+
+    if (format === 'mp3') {
+      // Usar RapidAPI para MP3
+      const mp3Options = {
+        method: 'GET',
+        url: 'https://youtube-mp36.p.rapidapi.com/dl',
+        params: { id: videoId },
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          'x-rapidapi-key': RAPIDAPI_KEY,
+          'x-rapidapi-host': 'youtube-mp36.p.rapidapi.com'
         }
-      },
-      ...options
-    };
-
-    if (format === 'mp3') {
-      downloadOptions = {
-        quality: 'highestaudio',
-        filter: 'audioonly',
-        requestOptions: {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-          }
-        },
-        ...options
       };
-    } else if (format === 'mp4') {
-      downloadOptions = {
-        quality: 'highest',
-        filter: (fmt) => fmt.container === 'mp4' && fmt.hasVideo && fmt.hasAudio,
-        requestOptions: {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-          }
-        },
-        ...options
-      };
-    }
 
-    // Crear el stream de descarga
-    const videoStream = ytdl(url, downloadOptions);
-    
-    // Configurar headers para la descarga
-    const headers = new Headers();
-    
-    if (format === 'mp3') {
-      headers.set('Content-Type', 'audio/mpeg');
-      headers.set('Content-Disposition', `attachment; filename="${title}.mp3"`);
-    } else {
-      headers.set('Content-Type', 'video/mp4');
-      headers.set('Content-Disposition', `attachment; filename="${title}.mp4"`);
-    }
-    
-    headers.set('Access-Control-Expose-Headers', 'Content-Disposition');
-    headers.set('Cache-Control', 'no-cache');
+      try {
+        const response = await axios.request(mp3Options);
+        const data = response.data;
 
-    // Convertir el stream de Node.js a un ReadableStream web-compatible
-    const webStream = new ReadableStream({
-      start(controller) {
-        videoStream.on('data', (chunk: Buffer) => {
-          const uint8Array = new Uint8Array(chunk);
-          controller.enqueue(uint8Array);
+        console.log('Respuesta MP3 API:', data);
+
+        if (data.status !== 'ok') {
+          return NextResponse.json(
+            { error: `Error al procesar MP3: ${data.msg || 'Error desconocido'}` },
+            { status: 500 }
+          );
+        }
+
+        // Retornar información de descarga
+        return NextResponse.json({
+          success: true,
+          format: 'mp3',
+          title: data.title,
+          downloadUrl: data.link,
+          duration: data.duration,
+          progress: data.progress,
+          status: data.status,
+          message: data.msg
         });
 
-        videoStream.on('end', () => {
-          controller.close();
-        });
-
-        videoStream.on('error', (error: Error) => {
-          console.error('Error en el stream:', error);
-          controller.error(error);
-        });
-      },
-      cancel() {
-        videoStream.destroy();
+      } catch (error) {
+        console.error('Error en API MP3:', error);
+        return NextResponse.json(
+          { error: 'Error al conectar con el servicio de descarga MP3' },
+          { status: 500 }
+        );
       }
-    });
 
-    return new Response(webStream, {
-      status: 200,
-      headers,
-    });
+    } else if (format === 'mp4') {
+      // Usar RapidAPI para MP4
+      const quality = options.quality || '251'; // Calidad por defecto
+      
+      const mp4Options = {
+        method: 'GET',
+        url: `https://youtube-video-fast-downloader-24-7.p.rapidapi.com/download_audio/${videoId}`,
+        params: { quality: quality },
+        headers: {
+          'x-rapidapi-key': RAPIDAPI_KEY,
+          'x-rapidapi-host': 'youtube-video-fast-downloader-24-7.p.rapidapi.com'
+        }
+      };
+
+      try {
+        const response = await axios.request(mp4Options);
+        const data = response.data;
+
+        console.log('Respuesta MP4 API:', data);
+
+        if (!data.file) {
+          return NextResponse.json(
+            { error: 'No se pudo obtener el archivo de descarga' },
+            { status: 500 }
+          );
+        }
+
+        // Retornar información de descarga
+        return NextResponse.json({
+          success: true,
+          format: 'mp4',
+          downloadUrl: data.file,
+          quality: data.id,
+          type: data.type,
+          bitrate: data.bitrate,
+          size: data.size,
+          mime: data.mime,
+          comment: data.comment
+        });
+
+      } catch (error) {
+        console.error('Error en API MP4:', error);
+        return NextResponse.json(
+          { error: 'Error al conectar con el servicio de descarga MP4' },
+          { status: 500 }
+        );
+      }
+
+    } else {
+      return NextResponse.json(
+        { error: 'Formato no soportado. Usa "mp3" o "mp4"' },
+        { status: 400 }
+      );
+    }
 
   } catch (error) {
-    console.error('Error al descargar video:', error);
+    console.error('Error al procesar descarga:', error);
     return NextResponse.json(
-      { error: 'Error al descargar el video: ' + (error instanceof Error ? error.message : 'Error desconocido') },
+      { error: 'Error interno del servidor: ' + (error instanceof Error ? error.message : 'Error desconocido') },
       { status: 500 }
     );
   }

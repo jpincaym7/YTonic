@@ -27,6 +27,7 @@
     "lucide-react": "^0.542.0",
     "motion": "^12.23.12",
     "next": "15.5.2",
+    "play-dl": "^1.9.7",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "rough-notation": "^0.5.1",

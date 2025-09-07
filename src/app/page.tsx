@@ -84,18 +84,51 @@ export default function Home() {
         throw new Error('Error al descargar el archivo');
       }
 
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = `${videoInfo.title}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(downloadUrl);
-      document.body.removeChild(a);
+      const data = await response.json();
       
-      setDownloadProgress(100);
+      if (!data.success) {
+        throw new Error(data.error || 'Error al procesar la descarga');
+      }
+
+      console.log('Respuesta de descarga:', data);
+
+      // Redirigir al usuario al enlace de descarga
+      const downloadUrl = data.downloadUrl;
+      
+      if (downloadUrl) {
+        // Crear un enlace temporal y hacer clic en él para iniciar la descarga
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.target = '_blank'; // Abrir en nueva pestaña
+        a.rel = 'noopener noreferrer';
+        
+        // Intentar usar el nombre del archivo si está disponible
+        if (data.format === 'mp3' && data.title) {
+          a.download = `${data.title.replace(/[^\w\s-]/gi, '').trim()}.mp3`;
+        } else {
+          a.download = `${videoInfo.title.replace(/[^\w\s-]/gi, '').trim()}.${format}`;
+        }
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        setDownloadProgress(100);
+        
+        // Mostrar información adicional si está disponible
+        if (data.format === 'mp4') {
+          console.log(`Calidad: ${data.quality}, Tamaño: ${data.size}, Tipo: ${data.type}`);
+          if (data.comment) {
+            console.log('Nota:', data.comment);
+          }
+        }
+        
+      } else {
+        throw new Error('No se recibió URL de descarga');
+      }
+      
     } catch (err) {
+      console.error('Error en descarga:', err);
       setError(err instanceof Error ? err.message : 'Error al descargar');
     } finally {
       setLoading(false);
