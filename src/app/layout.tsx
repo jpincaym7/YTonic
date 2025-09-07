@@ -27,6 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <script 
+          async 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7692639932873351"
+          crossOrigin="anonymous"
+        ></script>
+      </head>
       <body
         className={`${inter.variable} ${poppins.variable} font-inter antialiased`}
       >
