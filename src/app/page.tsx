@@ -117,9 +117,12 @@ export default function Home() {
         
         // Mostrar información adicional si está disponible
         if (data.format === 'mp4') {
-          console.log(`Calidad: ${data.quality}, Tamaño: ${data.size}, Tipo: ${data.type}`);
-          if (data.comment) {
-            console.log('Nota:', data.comment);
+          console.log(`Calidad: ${data.quality}, Resolución: ${data.width}x${data.height}`);
+          if (data.fileSize) {
+            console.log(`Tamaño: ${(parseInt(data.fileSize) / (1024 * 1024)).toFixed(2)} MB`);
+          }
+          if (data.duration) {
+            console.log(`Duración: ${Math.floor(parseInt(data.duration) / 60)}:${(parseInt(data.duration) % 60).toString().padStart(2, '0')}`);
           }
         }
         
