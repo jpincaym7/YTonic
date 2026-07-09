@@ -1,0 +1,43 @@
+name: CI
+
+# Ejecución automática al subir código
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    name: Lint, Type Check & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código del repositorio
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 2. Configurar Node.js con caché de dependencias npm
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3. Instalar dependencias de forma limpia y reproducible
+      - name: Instalar dependencias
+        run: npm ci
+
+      # 4. Analizar el código con ESLint
+      - name: Ejecutar ESLint
+        run: npm run lint
+
+      # 5. Verificar los tipos de TypeScript
+      - name: Verificar tipos (TypeScript)
+        run: npx tsc --noEmit
+
+      # 6. Compilar la aplicación Next.js
+      - name: Compilar la aplicación
+        run: npm run build
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
