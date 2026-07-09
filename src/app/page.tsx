@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import AdvancedOptions from '../components/AdvancedOptions';
 import Header from '../components/Header';
 import InputSection from '../components/InputSection';
 import FeaturesSection from '../components/FeaturesSection';
 import InfoSection from '../components/InfoSection';
 import SharedMenu from '../components/SharedMenu';
 import Footer from '../components/Footer';
-import type { VideoInfo, DownloadOptions } from '../types';
+import type { VideoInfo } from '../types';
 
 export default function Home() {
   const [url, setUrl] = useState('');
@@ -16,12 +15,6 @@ export default function Home() {
   const [error, setError] = useState('');
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [downloadProgress, setDownloadProgress] = useState(0);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-  const [advancedOptions, setAdvancedOptions] = useState<DownloadOptions>({
-    quality: 'highest',
-    highWaterMark: 512 * 1024,
-    dlChunkSize: 10 * 1024 * 1024,
-  });
 
   const handleGetInfo = async () => {
     if (!url) {
@@ -55,7 +48,7 @@ export default function Home() {
     }
   };
 
-  const handleDownload = async (format: 'mp3' | 'mp4') => {
+  const handleDownload = async (format: 'mp3') => {
     if (!videoInfo) return;
 
     setLoading(true);
@@ -63,9 +56,10 @@ export default function Home() {
 
     try {
       const mergedOptions = {
-        ...advancedOptions,
-        quality: format === 'mp3' ? 'highestaudio' : advancedOptions.quality,
-        filter: format === 'mp3' ? 'audioonly' : 'audioandvideo'
+        quality: 'highestaudio',
+        highWaterMark: 512 * 1024,
+        dlChunkSize: 10 * 1024 * 1024,
+        filter: 'audioonly'
       };
 
       const response = await fetch('/api/youtube/download', {
@@ -103,29 +97,14 @@ export default function Home() {
         a.rel = 'noopener noreferrer';
         
         // Intentar usar el nombre del archivo si está disponible
-        if (data.format === 'mp3' && data.title) {
-          a.download = `${data.title.replace(/[^\w\s-]/gi, '').trim()}.mp3`;
-        } else {
-          a.download = `${videoInfo.title.replace(/[^\w\s-]/gi, '').trim()}.${format}`;
-        }
-        
+        const fileTitle = data.title || videoInfo.title;
+        a.download = `${fileTitle.replace(/[^\w\s-]/gi, '').trim()}.mp3`;
+
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
+
         setDownloadProgress(100);
-        
-        // Mostrar información adicional si está disponible
-        if (data.format === 'mp4') {
-          console.log(`Calidad: ${data.quality}, Resolución: ${data.width}x${data.height}`);
-          if (data.fileSize) {
-            console.log(`Tamaño: ${(parseInt(data.fileSize) / (1024 * 1024)).toFixed(2)} MB`);
-          }
-          if (data.duration) {
-            console.log(`Duración: ${Math.floor(parseInt(data.duration) / 60)}:${(parseInt(data.duration) % 60).toString().padStart(2, '0')}`);
-          }
-        }
-        
       } else {
         throw new Error('No se recibió URL de descarga');
       }
@@ -159,8 +138,6 @@ export default function Home() {
             error={error}
             videoInfo={videoInfo}
             downloadProgress={downloadProgress}
-            advancedOptions={advancedOptions}
-            setShowAdvancedOptions={setShowAdvancedOptions}
             onGetInfo={handleGetInfo}
             onDownload={handleDownload}
           />
@@ -182,12 +159,6 @@ export default function Home() {
       <div className="animate-in slide-in-from-bottom duration-700 delay-800">
         <Footer />
       </div>
-
-      <AdvancedOptions
-        isOpen={showAdvancedOptions}
-        onClose={() => setShowAdvancedOptions(false)}
-        onApply={(options) => setAdvancedOptions(options)}
-      />
     </div>
   );
 }
