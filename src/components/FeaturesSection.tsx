@@ -59,7 +59,7 @@ const features = [
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <div className="bg-black rounded-xl p-6 border border-gray-700 text-center min-w-[280px] mx-2">
+    <div className="bg-black rounded-xl p-6 border border-gray-700 text-center min-w-[280px] mx-2 transition-all duration-300 hover:scale-105 hover:border-gray-500 hover:shadow-lg hover:shadow-white/5">
       <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4">
         {icon}
       </div>
