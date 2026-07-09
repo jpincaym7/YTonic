@@ -18,7 +18,7 @@ export default function Header() {
             <Highlighter action="underline" color="#00D4FF">
               MP3 o MP4
             </Highlighter>{" "}
-            con la mejor calidad
+            con la mejor calidad, rápido y gratis
           </p>
         </div>
       </div>
