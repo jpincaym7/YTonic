@@ -73,10 +73,10 @@ export default function FeaturesSection() {
   return (
     <div className="mt-16 w-full">
       <div className="text-center mb-12">
-        <h2 className="text-3xl sm:text-4xl font-display font-black text-white mb-6 tracking-tight">
-          Características principales
+        <h2 className="text-3xl sm:text-4xl font-display font-black mb-6 tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+          ✨ Características principales
         </h2>
-        <p className="text-gray-300 max-w-2xl mx-auto text-lg font-light leading-relaxed">
+        <p className="text-gray-400 max-w-2xl mx-auto text-lg font-light leading-relaxed">
           Una herramienta simple y poderosa para descargar contenido de YouTube con la mejor calidad
         </p>
       </div>
