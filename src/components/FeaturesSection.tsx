@@ -59,7 +59,7 @@ const features = [
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <div className="bg-black rounded-xl p-6 border border-gray-700 text-center min-w-[280px] mx-2">
+    <div className="bg-black rounded-xl p-6 border border-gray-700 text-center min-w-[280px] mx-2 transition-all duration-300 hover:scale-105 hover:border-gray-500 hover:shadow-lg hover:shadow-white/5">
       <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4">
         {icon}
       </div>
@@ -73,10 +73,10 @@ export default function FeaturesSection() {
   return (
     <div className="mt-16 w-full">
       <div className="text-center mb-12">
-        <h2 className="text-3xl sm:text-4xl font-display font-black text-white mb-6 tracking-tight">
-          Características principales
+        <h2 className="text-3xl sm:text-4xl font-display font-black mb-6 tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+          ✨ Características principales
         </h2>
-        <p className="text-gray-300 max-w-2xl mx-auto text-lg font-light leading-relaxed">
+        <p className="text-gray-400 max-w-2xl mx-auto text-lg font-light leading-relaxed">
           Una herramienta simple y poderosa para descargar contenido de YouTube con la mejor calidad
         </p>
       </div>
