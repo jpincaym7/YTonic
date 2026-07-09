@@ -6,8 +6,10 @@ import Header from '../components/Header';
 import InputSection from '../components/InputSection';
 import FeaturesSection from '../components/FeaturesSection';
 import InfoSection from '../components/InfoSection';
+import HistorySection from '../components/HistorySection';
 import SharedMenu from '../components/SharedMenu';
 import Footer from '../components/Footer';
+import { addDownloadHistoryEntry } from '../lib/download-history';
 import type { VideoInfo, DownloadOptions } from '../types';
 
 export default function Home() {
@@ -17,6 +19,7 @@ export default function Home() {
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [advancedOptions, setAdvancedOptions] = useState<DownloadOptions>({
     quality: 'highest',
     highWaterMark: 512 * 1024,
@@ -112,9 +115,16 @@ export default function Home() {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
+
         setDownloadProgress(100);
-        
+
+        // Registrar la descarga en el historial (Version 2: historial + reportes)
+        addDownloadHistoryEntry({
+          title: data.title || videoInfo.title,
+          format,
+        });
+        setHistoryRefreshKey((key) => key + 1);
+
         // Mostrar información adicional si está disponible
         if (data.format === 'mp4') {
           console.log(`Calidad: ${data.quality}, Resolución: ${data.width}x${data.height}`);
@@ -174,6 +184,11 @@ export default function Home() {
         {/* Features Section */}
         <div className="animate-in slide-in-from-bottom duration-700 delay-500">
           <FeaturesSection />
+        </div>
+
+        {/* History & Reports Section */}
+        <div className="animate-in slide-in-from-bottom duration-700 delay-600 mt-8">
+          <HistorySection refreshKey={historyRefreshKey} />
         </div>
 
       </main>
