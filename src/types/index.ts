@@ -1,24 +1,29 @@
 /**
- * Tipos e interfaces para la aplicación YouTube to MP3/MP4 Downloader
+ * Tipos e interfaces para la aplicación YouTube / Spotify to MP3/MP4 Downloader
  */
 
 /**
- * Información básica de un video de YouTube
+ * Fuente de descarga soportada
+ */
+export type MediaSource = 'youtube' | 'spotify';
+
+/**
+ * Información básica de un video (YouTube) o track (Spotify)
  */
 export interface VideoInfo {
-  /** ID único del video de YouTube */
+  /** ID único del video/track */
   id: string;
-  /** Título del video */
+  /** Título del video/canción */
   title: string;
-  /** Nombre del autor/canal */
+  /** Nombre del autor/canal o artista */
   author: string;
-  /** Duración del video en formato legible */
+  /** Duración en formato legible */
   duration: string;
-  /** Duración del video en segundos */
+  /** Duración en segundos */
   durationSeconds: number;
-  /** Número de visualizaciones */
+  /** Número de visualizaciones (0 para Spotify) */
   views: number;
-  /** URL de la miniatura del video */
+  /** URL de la miniatura / carátula */
   thumbnail: string;
   /** Descripción del video (opcional) */
   description?: string;
@@ -26,6 +31,12 @@ export interface VideoInfo {
   publishedAt?: string;
   /** ID del canal */
   channelId?: string;
+  /** Fuente del contenido (youtube por defecto) */
+  source?: MediaSource;
+  /** Álbum (solo Spotify) */
+  album?: string;
+  /** Enlace de descarga ya resuelto (solo Spotify: se resuelve al obtener info) */
+  downloadUrl?: string;
 }
 
 /**

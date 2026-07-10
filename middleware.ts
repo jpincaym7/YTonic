@@ -17,8 +17,11 @@ export function middleware(request: NextRequest) {
     "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self';"
   );
 
-  // Headers específicos para APIs de YouTube
-  if (request.nextUrl.pathname.startsWith('/api/youtube')) {
+  // Headers específicos para APIs de descarga (YouTube / Spotify)
+  if (
+    request.nextUrl.pathname.startsWith('/api/youtube') ||
+    request.nextUrl.pathname.startsWith('/api/spotify')
+  ) {
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type');

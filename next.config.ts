@@ -21,6 +21,25 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Portadas de Spotify
+      {
+        protocol: 'https',
+        hostname: 'i.scdn.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mosaic.scdn.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.spotifycdn.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   // Cambio: serverComponentsExternalPackages movido a serverExternalPackages

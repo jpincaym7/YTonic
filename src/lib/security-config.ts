@@ -9,6 +9,13 @@ export const SECURITY_CONFIG = {
     TIME_WINDOW: 5 * 60 * 1000, // 5 minutos
   },
 
+  // Tope global de descargas por servicio (YouTube / Spotify) — protege la cuota de RapidAPI.
+  // Contador persistente en Upstash Redis, se reinicia cada 24 h.
+  DOWNLOAD_LIMIT: {
+    MAX_REQUESTS: 20, // máximo por servicio dentro de la ventana
+    TIME_WINDOW: 24 * 60 * 60 * 1000, // 24 horas
+  },
+
   // Límites de campos
   FIELD_LIMITS: {
     NAME: { min: 2, max: 50 },
@@ -60,6 +67,7 @@ export const SECURITY_CONFIG = {
     INVALID_CHARACTERS: (field: string) => `${field} contiene caracteres no válidos`,
     SPAM_DETECTED: 'El contenido parece ser spam',
     RATE_LIMITED: 'Demasiados intentos. Espera un momento antes de intentar nuevamente.',
+    DOWNLOAD_LIMITED: 'Se alcanzó el límite diario de descargas. Vuelve a intentarlo mañana.',
     SERVER_ERROR: 'Error del servidor. Por favor, inténtalo más tarde.',
   },
 } as const;
