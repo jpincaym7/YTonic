@@ -3,20 +3,37 @@
  */
 
 /**
- * Extrae el ID del video de una URL de YouTube
+ * Extrae el ID del video de una URL de YouTube.
+ * Cubre todos los formatos comunes: watch, youtu.be, shorts, embed, live, v,
+ * y los subdominios www / m / music. El ID de YouTube son exactamente 11
+ * caracteres del conjunto [A-Za-z0-9_-].
  */
 export function extractVideoId(url: string): string | null {
-  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
+  if (!url) return null;
+  const trimmed = url.trim();
+
+  const patterns = [
+    /youtube\.com\/watch\?(?:.*&)?v=([A-Za-z0-9_-]{11})/, // www/m/music .youtube.com/watch?v=
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,                     // youtu.be/ID
+    /youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/,          // /shorts/ID
+    /youtube\.com\/live\/([A-Za-z0-9_-]{11})/,            // /live/ID
+    /youtube\.com\/embed\/([A-Za-z0-9_-]{11})/,           // /embed/ID
+    /youtube\.com\/v\/([A-Za-z0-9_-]{11})/,               // /v/ID
+  ];
+
+  for (const regex of patterns) {
+    const match = trimmed.match(regex);
+    if (match) return match[1];
+  }
+  return null;
 }
 
 /**
- * Valida si una URL es de YouTube
+ * Valida si una URL es un video de YouTube reconocible.
+ * Coherente con extractVideoId: válida ⟺ se puede extraer un ID.
  */
 export function isValidYouTubeUrl(url: string): boolean {
-  const regex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
-  return regex.test(url);
+  return extractVideoId(url) !== null;
 }
 
 /**

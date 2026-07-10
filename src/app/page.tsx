@@ -8,6 +8,8 @@ import FeaturesSection from '../components/FeaturesSection';
 import InfoSection from '../components/InfoSection';
 import SharedMenu from '../components/SharedMenu';
 import Footer from '../components/Footer';
+import { isValidYouTubeUrl } from '../lib/youtube-utils';
+import { isValidSpotifyUrl } from '../lib/spotify-utils';
 import type { VideoInfo, DownloadOptions, MediaSource } from '../types';
 
 export default function Home() {
@@ -17,6 +19,7 @@ export default function Home() {
   const [error, setError] = useState('');
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [downloadProgress, setDownloadProgress] = useState(0);
+  const [hasDownloaded, setHasDownloaded] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [advancedOptions, setAdvancedOptions] = useState<DownloadOptions>({
     quality: 'highest',
@@ -32,6 +35,16 @@ export default function Home() {
     setVideoInfo(null);
     setError('');
     setDownloadProgress(0);
+    setHasDownloaded(false);
+  };
+
+  // Reinicia el flujo para convertir un nuevo enlace
+  const handleReset = () => {
+    setUrl('');
+    setVideoInfo(null);
+    setError('');
+    setDownloadProgress(0);
+    setHasDownloaded(false);
   };
 
   // Dispara la descarga en el navegador a partir de un enlace ya resuelto
@@ -47,7 +60,9 @@ export default function Home() {
   };
 
   const handleGetInfo = async () => {
-    if (!url) {
+    const trimmedUrl = url.trim();
+
+    if (!trimmedUrl) {
       setError(
         source === 'spotify'
           ? 'Por favor ingresa una URL de Spotify'
@@ -56,10 +71,22 @@ export default function Home() {
       return;
     }
 
+    // Validación en el cliente (feedback instantáneo, sin viaje al servidor)
+    const isValid = source === 'spotify' ? isValidSpotifyUrl(trimmedUrl) : isValidYouTubeUrl(trimmedUrl);
+    if (!isValid) {
+      setError(
+        source === 'spotify'
+          ? 'El enlace no es una canción (track) de Spotify válida'
+          : 'El enlace no es un video de YouTube válido'
+      );
+      return;
+    }
+
     setLoading(true);
     setError('');
     setVideoInfo(null);
     setDownloadProgress(0);
+    setHasDownloaded(false);
 
     try {
       const endpoint = source === 'spotify' ? '/api/spotify/info' : '/api/youtube/info';
@@ -68,7 +95,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: trimmedUrl }),
       });
 
       const data = await response.json();
@@ -96,6 +123,7 @@ export default function Home() {
       }
       triggerBrowserDownload(videoInfo.downloadUrl, videoInfo.title, 'mp3');
       setDownloadProgress(100);
+      setHasDownloaded(true);
       return;
     }
 
@@ -115,7 +143,7 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          url,
+          url: url.trim(),
           format,
           options: mergedOptions
         }),
@@ -142,6 +170,7 @@ export default function Home() {
         triggerBrowserDownload(downloadUrl, title, format);
 
         setDownloadProgress(100);
+        setHasDownloaded(true);
 
         // Mostrar información adicional si está disponible
         if (data.format === 'mp4') {
@@ -189,10 +218,12 @@ export default function Home() {
             error={error}
             videoInfo={videoInfo}
             downloadProgress={downloadProgress}
+            hasDownloaded={hasDownloaded}
             advancedOptions={advancedOptions}
             setShowAdvancedOptions={setShowAdvancedOptions}
             onGetInfo={handleGetInfo}
             onDownload={handleDownload}
+            onReset={handleReset}
           />
         </div>
 

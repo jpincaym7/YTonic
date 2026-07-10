@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
+import { isValidYouTubeUrl } from '../lib/youtube-utils';
+import { isValidSpotifyUrl } from '../lib/spotify-utils';
 import type { VideoInfo, DownloadOptions, MediaSource } from '../types';
 
 interface InputSectionProps {
@@ -11,10 +13,12 @@ interface InputSectionProps {
   error: string;
   videoInfo: VideoInfo | null;
   downloadProgress: number;
+  hasDownloaded: boolean;
   advancedOptions: DownloadOptions;
   setShowAdvancedOptions: (show: boolean) => void;
   onGetInfo: () => void;
   onDownload: (format: 'mp3' | 'mp4') => void;
+  onReset: () => void;
 }
 
 export default function InputSection({
@@ -26,9 +30,11 @@ export default function InputSection({
   error,
   videoInfo,
   downloadProgress,
+  hasDownloaded,
   setShowAdvancedOptions,
   onGetInfo,
   onDownload,
+  onReset,
 }: InputSectionProps) {
   const [showCaptcha, setShowCaptcha] = useState(false);
   const [pendingFormat, setPendingFormat] = useState<'mp3' | 'mp4' | null>(null);
@@ -36,6 +42,13 @@ export default function InputSection({
   const [captchaInput, setCaptchaInput] = useState('');
 
   const isSpotify = source === 'spotify';
+
+  // Validación en el cliente (misma lógica que el servidor)
+  const urlValid = isSpotify ? isValidSpotifyUrl(url.trim()) : isValidYouTubeUrl(url.trim());
+  // Convirtió pero aún no descarga: se bloquea convertir otro enlace
+  const pendingDownload = !!videoInfo && !hasDownloaded;
+  // Mostrar aviso de enlace inválido solo mientras se escribe (aún sin resultado)
+  const showInvalidHint = url.trim().length > 0 && !urlValid && !videoInfo;
 
   // Generar CAPTCHA simple
   const generateCaptcha = () => {
@@ -84,7 +97,7 @@ export default function InputSection({
             <button
               type="button"
               onClick={() => setSource('youtube')}
-              disabled={loading}
+              disabled={loading || pendingDownload}
               className={`flex-1 px-4 py-2.5 rounded-md font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                 source === 'youtube'
                   ? 'bg-primary text-primary-foreground'
@@ -99,7 +112,7 @@ export default function InputSection({
             <button
               type="button"
               onClick={() => setSource('spotify')}
-              disabled={loading}
+              disabled={loading || pendingDownload}
               className={`flex-1 px-4 py-2.5 rounded-md font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                 source === 'spotify'
                   ? 'bg-primary text-primary-foreground'
@@ -119,29 +132,100 @@ export default function InputSection({
               className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-90 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center justify-center gap-2 text-sm"
             >
               <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-              Convirtiendo...
+              Procesando...
             </button>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                id="url"
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder={isSpotify ? 'Pega aquí la URL de Spotify (track)...' : 'Pega aquí la URL de YouTube...'}
-                className="flex-1 px-5 py-4 rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-transparent transition-all duration-200 text-base shadow-inner"
-                disabled={loading}
-              />
+          ) : videoInfo && hasDownloaded ? (
+            /* Estado: ya descargó -> invitar a convertir otro */
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <p className="flex-1 flex items-center gap-2 text-sm text-foreground">
+                <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>Descarga iniciada. Ya puedes convertir otro enlace.</span>
+              </p>
               <button
-                onClick={onGetInfo}
-                disabled={loading || !url}
-                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold flex items-center justify-center gap-2 min-w-[140px] text-base shadow-lg shadow-orange-500/20"
+                onClick={onReset}
+                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 font-bold flex items-center justify-center gap-2 min-w-[140px] text-base shadow-lg shadow-orange-500/20"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Convertir
+                Convertir otro
               </button>
+            </div>
+          ) : pendingDownload ? (
+            /* Estado: convertido pero sin descargar -> bloqueado */
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="url"
+                  value={url}
+                  readOnly
+                  disabled
+                  className="flex-1 px-5 py-4 rounded-xl border border-input bg-muted text-muted-foreground opacity-70 cursor-not-allowed text-base shadow-inner"
+                />
+                <div className="px-8 py-4 rounded-xl bg-secondary text-secondary-foreground flex items-center justify-center gap-2 min-w-[140px] text-sm font-medium cursor-not-allowed select-none">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                  Bloqueado
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v9.586l2.293-2.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 13.586V4a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  <span>Descarga tu archivo abajo para convertir otro enlace.</span>
+                </p>
+                <button
+                  onClick={onReset}
+                  className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 whitespace-nowrap transition-colors"
+                >
+                  Cambiar enlace
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Estado: escribir enlace */
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  id="url"
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder={isSpotify ? 'Pega aquí la URL de Spotify (track)...' : 'Pega aquí la URL de YouTube...'}
+                  className={`flex-1 px-5 py-4 rounded-xl border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 text-base shadow-inner ${
+                    showInvalidHint
+                      ? 'border-destructive/50 focus:ring-destructive/40'
+                      : 'border-input focus:ring-orange-500/50'
+                  }`}
+                  disabled={loading}
+                />
+                <button
+                  onClick={onGetInfo}
+                  disabled={loading || !urlValid}
+                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold flex items-center justify-center gap-2 min-w-[140px] text-base shadow-lg shadow-orange-500/20"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Convertir
+                </button>
+              </div>
+              {showInvalidHint && (
+                <p className="text-xs text-destructive flex items-center gap-1.5">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.492-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span>
+                    {isSpotify
+                      ? 'Pega un enlace de canción de Spotify (open.spotify.com/track/...).'
+                      : 'Pega un enlace de video de YouTube válido (watch, youtu.be, shorts...).'}
+                  </span>
+                </p>
+              )}
             </div>
           )}
 
